@@ -12,6 +12,13 @@ import ToolPage from './pages/ToolPage'
 import LoginPage from './pages/LoginPage'
 import AdminDashboard from './pages/AdminDashboard'
 
+// Páginas estáticas
+import SobrePage from './pages/SobrePage'
+import CuradoriaPage from './pages/CuradoriaPage'
+import CategoriasPage from './pages/CategoriasPage'
+import ModeloLivrePage from './pages/ModeloLivrePage'
+import CreditosPage from './pages/CreditosPage'
+
 // Páginas administrativas
 import CriarFerramenta from './pages/admin/CriarFerramenta'
 import ListarFerramentas from './pages/admin/ListarFerramentas'
@@ -34,6 +41,13 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="ferramenta/:id" element={<ToolPage />} />
+          
+          {/* Páginas estáticas */}
+          <Route path="sobre" element={<SobrePage />} />
+          <Route path="curadoria" element={<CuradoriaPage />} />
+          <Route path="categorias" element={<CategoriasPage />} />
+          <Route path="modelo-livre" element={<ModeloLivrePage />} />
+          <Route path="creditos" element={<CreditosPage />} />
         </Route>
 
         {/* Página de login (sem layout) */}

@@ -1,171 +1,133 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Substitua essas variáveis pelas suas configurações do Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'YOUR_SUPABASE_URL'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY'
+// Configurações do Supabase
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://emhabcflfiabquldgbel.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtaGFiY2ZsZmlhYnF1bGRnYmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5ODEyMTEsImV4cCI6MjA3MzU1NzIxMX0.rGlwBODlJcv7wSiVrES6QCamC1hhYXT4m54Y_yeG-og'
 
+// Cliente Supabase com autenticação
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Tipos das tabelas do banco de dados
+// Tabelas
 export const tableNames = {
-  EQUIPE: 'equipe',
   FERRAMENTAS: 'ferramentas',
-  PAGINAS_RELACIONADAS: 'paginas_relacionadas'
+  CATEGORIAS: 'categorias',
+  SOLICITACOES: 'solicitacoes_acesso',
+  EQUIPE: 'equipe'
 }
 
-// Funções auxiliares para interação com as tabelas
-export const supabaseService = {
-  // Funções para tabela de ferramentas
-  async getFerramentas() {
-    const { data, error } = await supabase
-      .from(tableNames.FERRAMENTAS)
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
-  },
-
-  async getFerramentaById(id) {
-    const { data, error } = await supabase
-      .from(tableNames.FERRAMENTAS)
-      .select('*')
-      .eq('id', id)
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  async createFerramenta(ferramenta) {
-    const { data, error } = await supabase
-      .from(tableNames.FERRAMENTAS)
-      .insert([ferramenta])
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  async updateFerramenta(id, updates) {
-    const { data, error } = await supabase
-      .from(tableNames.FERRAMENTAS)
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  async deleteFerramenta(id) {
-    const { error } = await supabase
-      .from(tableNames.FERRAMENTAS)
-      .delete()
-      .eq('id', id)
-    
-    if (error) throw error
-  },
-
-  // Funções para páginas relacionadas
-  async getPaginasRelacionadas(ferramentaId = null) {
-    let query = supabase
-      .from(tableNames.PAGINAS_RELACIONADAS)
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (ferramentaId) {
-      query = query.eq('ferramenta_id', ferramentaId)
-    }
-    
-    const { data, error } = await query
-    
-    if (error) throw error
-    return data
-  },
-
-  async getPaginaRelacionadaById(id) {
-    const { data, error } = await supabase
-      .from(tableNames.PAGINAS_RELACIONADAS)
-      .select('*')
-      .eq('id', id)
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  async createPaginaRelacionada(pagina) {
-    const { data, error } = await supabase
-      .from(tableNames.PAGINAS_RELACIONADAS)
-      .insert([pagina])
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  async updatePaginaRelacionada(id, updates) {
-    const { data, error } = await supabase
-      .from(tableNames.PAGINAS_RELACIONADAS)
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  async deletePaginaRelacionada(id) {
-    const { error } = await supabase
-      .from(tableNames.PAGINAS_RELACIONADAS)
-      .delete()
-      .eq('id', id)
-    
-    if (error) throw error
-  },
-
-  // Funções de autenticação
+// Serviços de autenticação
+export const authService = {
+  // Login com email e senha
   async signIn(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
+    return { data, error }
+  },
+
+  // Cadastro de novo usuário
+  async signUp(email, password, userData = {}) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: userData
+      }
+    })
+    return { data, error }
+  },
+
+  // Logout
+  async signOut() {
+    const { error } = await supabase.auth.signOut()
+    return { error }
+  },
+
+  // Obter usuário atual
+  async getCurrentUser() {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    return { user, error }
+  },
+
+  // Obter dados do usuário na tabela equipe
+  async getUserTeamData(email) {
+    const { data, error } = await supabase
+      .from(tableNames.EQUIPE)
+      .select('*')
+      .eq('email', email)
+      .single()
+    
+    return { data, error }
+  },
+
+  // Criar ou atualizar dados do usuário na tabela equipe
+  async upsertUserTeamData(userData) {
+    const { data, error } = await supabase
+      .from(tableNames.EQUIPE)
+      .upsert(userData, { onConflict: 'email' })
+      .select()
+      .single()
+    
+    return { data, error }
+  }
+}
+
+// Serviço de dados
+export const supabaseService = {
+  supabase,
+  
+  // Métodos básicos para CRUD
+  async fetchFerramentas() {
+    const { data, error } = await supabase
+      .from(tableNames.FERRAMENTAS)
+      .select('*')
+      .order('nome', { ascending: true })
+    
+    if (error) throw error
+    return data
+  },
+  
+  async fetchFerramenta(id) {
+    const { data, error } = await supabase
+      .from(tableNames.FERRAMENTAS)
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+  
+  async fetchCategorias() {
+    const { data, error } = await supabase
+      .from(tableNames.CATEGORIAS)
+      .select('*')
+      .order('nome', { ascending: true })
     
     if (error) throw error
     return data
   },
 
-  async signOut() {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-  },
-
-  async getCurrentUser() {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) throw error
-    return user
-  },
-
-  async getCurrentSession() {
-    const { data: { session }, error } = await supabase.auth.getSession()
-    if (error) throw error
-    return session
-  },
-
-  // Verificar se usuário é admin
-  async isUserAdmin(userId) {
+  // Métodos para gerenciamento de equipe
+  async fetchEquipe() {
     const { data, error } = await supabase
       .from(tableNames.EQUIPE)
-      .select('is_admin')
-      .eq('id', userId)
-      .single()
+      .select('*')
+      .order('created_at', { ascending: false })
     
     if (error) throw error
-    return data?.is_admin || false
+    return data
+  },
+
+  async updateUserRole(userId, papel) {
+    const { data, error } = await supabase
+      .from(tableNames.EQUIPE)
+      .update({ papel, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+      .select()
+      .single()
+    
+    return { data, error }
   }
 }

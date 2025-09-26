@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useFerramentasStore } from '../../stores'
+import AdminHeader from '../../components/AdminHeader'
+import FooterNav from '../../components/FooterNav'
 
 const CriarFerramenta = () => {
   const navigate = useNavigate()
@@ -51,11 +53,15 @@ const CriarFerramenta = () => {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <>
+    <div className="min-h-screen bg-gray-100">
+      <AdminHeader subtitle="Criar nova ferramenta para a plataforma" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Criar Nova Ferramenta</h2>
         <button
-          onClick={() => navigate('/admin/ferramentas')}
+          onClick={() => navigate('/painel/ferramentas')}
           className="text-gray-600 hover:text-gray-800 transition-colors"
         >
           ← Voltar
@@ -173,8 +179,13 @@ const CriarFerramenta = () => {
             </button>
           </div>
         </form>
+        </div>
+        
+        {/* Footer Navigation */}
+        <FooterNav />
       </div>
     </div>
+    </>
   )
 }
 

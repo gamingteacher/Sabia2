@@ -1,266 +1,295 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { supabase, supabaseService } from '../services/supabase'
+import { authService } from '../services/supabase'
 
-// Store de autenticação
+// Store principal de autenticação
 export const useAuthStore = create(
   persist(
     (set, get) => ({
+      // Estado inicial
       user: null,
-      session: null,
-      isAdmin: false,
-      loading: false,
+      teamData: null,
+      isLoading: false,
+      isAuthenticated: false,
 
-      // Inicializar autenticação
-      initAuth: async () => {
-        set({ loading: true })
+      // Getters computados
+      isAdmin: () => {
+        const { teamData } = get()
+        return teamData?.papel === 'administrador'
+      },
+
+      isTeamMember: () => {
+        const { teamData } = get()
+        return ['administrador', 'equipe', 'membro'].includes(teamData?.papel)
+      },
+
+      isPending: () => {
+        const { teamData } = get()
+        return teamData?.papel === 'pendente'
+      },
+
+      hasToolAccess: () => {
+        const { teamData } = get()
+        return ['administrador', 'equipe', 'membro'].includes(teamData?.papel)
+      },
+
+      // Actions
+      setLoading: (loading) => set({ isLoading: loading }),
+
+      // Login
+      login: async (email, password) => {
+        set({ isLoading: true })
+        
         try {
-          const session = await supabaseService.getCurrentSession()
-          if (session?.user) {
-            const isAdmin = await supabaseService.isUserAdmin(session.user.id)
+          const { data, error } = await authService.signIn(email, password)
+          
+          if (error) {
+            throw new Error(error.message)
+          }
+
+          if (data.user) {
+            // Buscar dados do usuário na tabela equipe
+            const { data: teamData, error: teamError } = await authService.getUserTeamData(data.user.email)
+            
+            if (teamError && teamError.code !== 'PGRST116') { // 116 = não encontrado
+              console.warn('Erro ao buscar dados da equipe:', teamError)
+            }
+
             set({
-              user: session.user,
-              session: session,
-              isAdmin: isAdmin,
-              loading: false
+              user: data.user,
+              teamData: teamData || null,
+              isAuthenticated: true,
+              isLoading: false
             })
-          } else {
-            set({ user: null, session: null, isAdmin: false, loading: false })
+
+            return { success: true, data: data.user }
           }
         } catch (error) {
-          console.error('Erro ao inicializar autenticação:', error)
-          set({ user: null, session: null, isAdmin: false, loading: false })
+          set({ isLoading: false })
+          return { success: false, error: error.message }
         }
       },
 
-      // Login
-      signIn: async (email, password) => {
-        set({ loading: true })
+      // Cadastro
+      register: async (email, password, userData = {}) => {
+        set({ isLoading: true })
+        
         try {
-          const { user, session } = await supabaseService.signIn(email, password)
-          const isAdmin = await supabaseService.isUserAdmin(user.id)
+          const { data, error } = await authService.signUp(email, password, userData)
           
-          set({
-            user: user,
-            session: session,
-            isAdmin: isAdmin,
-            loading: false
-          })
-          
-          return { success: true }
+          if (error) {
+            throw new Error(error.message)
+          }
+
+          if (data.user) {
+            // Criar entrada na tabela equipe com papel 'pendente'
+            const teamUserData = {
+              email: data.user.email,
+              nome: userData.nome || '',
+              instituicao: userData.instituicao || '',
+              papel: 'pendente'
+            }
+
+            console.log('Tentando criar dados da equipe:', teamUserData)
+            const { data: teamData, error: teamError } = await authService.upsertUserTeamData(teamUserData)
+            
+            if (teamError) {
+              console.error('Erro detalhado ao criar dados da equipe:', {
+                error: teamError,
+                message: teamError.message,
+                details: teamError.details,
+                hint: teamError.hint,
+                code: teamError.code
+              })
+            } else {
+              console.log('Dados da equipe criados com sucesso:', teamData)
+            }
+
+            set({
+              user: data.user,
+              teamData: teamData || teamUserData,
+              isAuthenticated: true,
+              isLoading: false
+            })
+
+            return { success: true, data: data.user }
+          }
         } catch (error) {
-          set({ loading: false })
+          set({ isLoading: false })
           return { success: false, error: error.message }
         }
       },
 
       // Logout
-      signOut: async () => {
+      logout: async () => {
+        set({ isLoading: true })
+        
         try {
-          await supabaseService.signOut()
-          set({ user: null, session: null, isAdmin: false })
+          const { error } = await authService.signOut()
+          
+          if (error) {
+            throw new Error(error.message)
+          }
+
+          set({
+            user: null,
+            teamData: null,
+            isAuthenticated: false,
+            isLoading: false
+          })
+
+          return { success: true }
         } catch (error) {
-          console.error('Erro ao fazer logout:', error)
+          set({ isLoading: false })
+          return { success: false, error: error.message }
         }
       },
 
-      // Verificar se está logado
-      isAuthenticated: () => {
-        const { user } = get()
-        return !!user
+      // Inicializar autenticação (verificar se há usuário logado)
+      initAuth: async () => {
+        set({ isLoading: true })
+        
+        try {
+          const { user, error } = await authService.getCurrentUser()
+          
+          if (error) {
+            throw new Error(error.message)
+          }
+
+          if (user) {
+            // Buscar dados da equipe
+            const { data: teamData, error: teamError } = await authService.getUserTeamData(user.email)
+            
+            if (teamError && teamError.code !== 'PGRST116') {
+              console.warn('Erro ao buscar dados da equipe:', teamError)
+            }
+
+            set({
+              user,
+              teamData: teamData || null,
+              isAuthenticated: true,
+              isLoading: false
+            })
+          } else {
+            set({
+              user: null,
+              teamData: null,
+              isAuthenticated: false,
+              isLoading: false
+            })
+          }
+        } catch (error) {
+          console.error('Erro ao inicializar autenticação:', error)
+          set({
+            user: null,
+            teamData: null,
+            isAuthenticated: false,
+            isLoading: false
+          })
+        }
       },
 
-      // Verificar se é admin
-      isUserAdmin: () => {
-        const { isAdmin } = get()
-        return isAdmin
+      // Atualizar dados da equipe (após mudança de papel)
+      refreshTeamData: async () => {
+        const { user } = get()
+        if (!user) return
+
+        try {
+          const { data: teamData, error } = await authService.getUserTeamData(user.email)
+          
+          if (error && error.code !== 'PGRST116') {
+            throw new Error(error.message)
+          }
+
+          set({ teamData: teamData || null })
+          return { success: true, data: teamData }
+        } catch (error) {
+          console.error('Erro ao atualizar dados da equipe:', error)
+          return { success: false, error: error.message }
+        }
       }
     }),
     {
       name: 'auth-storage',
       partialize: (state) => ({
         user: state.user,
-        session: state.session,
-        isAdmin: state.isAdmin
+        teamData: state.teamData,
+        isAuthenticated: state.isAuthenticated
       })
     }
   )
 )
 
-// Store para ferramentas
+// Store para gerenciamento de ferramentas (temporário - substituindo o antigo sistema)
 export const useFerramentasStore = create((set, get) => ({
   ferramentas: [],
   ferramentaAtual: null,
   loading: false,
   error: null,
 
-  // Carregar todas as ferramentas
   loadFerramentas: async () => {
     set({ loading: true, error: null })
     try {
-      const ferramentas = await supabaseService.getFerramentas()
-      set({ ferramentas, loading: false })
+      // Aqui você pode implementar a lógica real
+      const mockData = []
+      set({ ferramentas: mockData, loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
     }
   },
 
-  // Carregar ferramenta específica
   loadFerramenta: async (id) => {
     set({ loading: true, error: null })
     try {
-      const ferramenta = await supabaseService.getFerramentaById(id)
-      set({ ferramentaAtual: ferramenta, loading: false })
+      // Aqui você pode implementar a lógica real
+      const mockData = null
+      set({ ferramentaAtual: mockData, loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
     }
   },
 
-  // Criar nova ferramenta
-  createFerramenta: async (ferramentaData) => {
+  createFerramenta: async (data) => {
     set({ loading: true, error: null })
     try {
-      const novaFerramenta = await supabaseService.createFerramenta(ferramentaData)
-      const { ferramentas } = get()
-      set({
-        ferramentas: [novaFerramenta, ...ferramentas],
-        loading: false
-      })
-      return { success: true, data: novaFerramenta }
+      // Aqui você pode implementar a lógica real
+      console.log('Criando ferramenta:', data)
+      set({ loading: false })
+      return { success: true }
     } catch (error) {
       set({ error: error.message, loading: false })
       return { success: false, error: error.message }
     }
   },
 
-  // Atualizar ferramenta
-  updateFerramenta: async (id, updates) => {
-    set({ loading: true, error: null })
-    try {
-      const ferramentaAtualizada = await supabaseService.updateFerramenta(id, updates)
-      const { ferramentas } = get()
-      const ferramentasAtualizadas = ferramentas.map(f => 
-        f.id === id ? ferramentaAtualizada : f
-      )
-      set({
-        ferramentas: ferramentasAtualizadas,
-        ferramentaAtual: ferramentaAtualizada,
-        loading: false
-      })
-      return { success: true, data: ferramentaAtualizada }
-    } catch (error) {
-      set({ error: error.message, loading: false })
-      return { success: false, error: error.message }
-    }
-  },
-
-  // Deletar ferramenta
   deleteFerramenta: async (id) => {
     set({ loading: true, error: null })
     try {
-      await supabaseService.deleteFerramenta(id)
-      const { ferramentas } = get()
-      const ferramentasAtualizadas = ferramentas.filter(f => f.id !== id)
-      set({ ferramentas: ferramentasAtualizadas, loading: false })
+      // Aqui você pode implementar a lógica real
+      console.log('Deletando ferramenta:', id)
+      set({ loading: false })
       return { success: true }
     } catch (error) {
       set({ error: error.message, loading: false })
       return { success: false, error: error.message }
     }
-  },
-
-  // Limpar erro
-  clearError: () => set({ error: null })
+  }
 }))
 
-// Store para páginas relacionadas
+// Store para gerenciamento de páginas (temporário)
 export const usePaginasStore = create((set, get) => ({
   paginas: [],
-  paginaAtual: null,
   loading: false,
   error: null,
 
-  // Carregar páginas relacionadas
-  loadPaginas: async (ferramentaId = null) => {
+  loadPaginas: async () => {
     set({ loading: true, error: null })
     try {
-      const paginas = await supabaseService.getPaginasRelacionadas(ferramentaId)
-      set({ paginas, loading: false })
+      // Aqui você pode implementar a lógica real
+      const mockData = []
+      set({ paginas: mockData, loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
     }
-  },
-
-  // Carregar página específica
-  loadPagina: async (id) => {
-    set({ loading: true, error: null })
-    try {
-      const pagina = await supabaseService.getPaginaRelacionadaById(id)
-      set({ paginaAtual: pagina, loading: false })
-    } catch (error) {
-      set({ error: error.message, loading: false })
-    }
-  },
-
-  // Criar nova página
-  createPagina: async (paginaData) => {
-    set({ loading: true, error: null })
-    try {
-      const novaPagina = await supabaseService.createPaginaRelacionada(paginaData)
-      const { paginas } = get()
-      set({
-        paginas: [novaPagina, ...paginas],
-        loading: false
-      })
-      return { success: true, data: novaPagina }
-    } catch (error) {
-      set({ error: error.message, loading: false })
-      return { success: false, error: error.message }
-    }
-  },
-
-  // Atualizar página
-  updatePagina: async (id, updates) => {
-    set({ loading: true, error: null })
-    try {
-      const paginaAtualizada = await supabaseService.updatePaginaRelacionada(id, updates)
-      const { paginas } = get()
-      const paginasAtualizadas = paginas.map(p => 
-        p.id === id ? paginaAtualizada : p
-      )
-      set({
-        paginas: paginasAtualizadas,
-        paginaAtual: paginaAtualizada,
-        loading: false
-      })
-      return { success: true, data: paginaAtualizada }
-    } catch (error) {
-      set({ error: error.message, loading: false })
-      return { success: false, error: error.message }
-    }
-  },
-
-  // Deletar página
-  deletePagina: async (id) => {
-    set({ loading: true, error: null })
-    try {
-      await supabaseService.deletePaginaRelacionada(id)
-      const { paginas } = get()
-      const paginasAtualizadas = paginas.filter(p => p.id !== id)
-      set({ paginas: paginasAtualizadas, loading: false })
-      return { success: true }
-    } catch (error) {
-      set({ error: error.message, loading: false })
-      return { success: false, error: error.message }
-    }
-  },
-
-  // Limpar erro
-  clearError: () => set({ error: null })
+  }
 }))
-
-// Listener para mudanças de autenticação
-supabase.auth.onAuthStateChange(async (event, session) => {
-  const { initAuth } = useAuthStore.getState()
-  await initAuth()
-})

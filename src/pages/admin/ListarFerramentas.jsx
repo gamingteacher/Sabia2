@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useFerramentasStore } from '../../stores'
+import FooterNav from '../../components/FooterNav'
+import AdminHeader from '../../components/AdminHeader'
 
 const ListarFerramentas = () => {
   const { ferramentas, loading, error, loadFerramentas, deleteFerramenta } = useFerramentasStore()
@@ -30,11 +32,15 @@ const ListarFerramentas = () => {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <>
+    <div className="min-h-screen bg-gray-100">
+      <AdminHeader subtitle="Gerencie e organize ferramentas da plataforma" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Gerenciar Ferramentas</h2>
         <Link
-          to="/admin/ferramentas/criar"
+          to="/painel/ferramentas/criar"
           className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +64,7 @@ const ListarFerramentas = () => {
             </svg>
             <p className="text-gray-500 mb-4">Nenhuma ferramenta cadastrada</p>
             <Link
-              to="/admin/ferramentas/criar"
+              to="/painel/ferramentas/criar"
               className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +159,7 @@ const ListarFerramentas = () => {
                           </svg>
                         </Link>
                         <Link
-                          to={`/admin/ferramentas/editar/${ferramenta.id}`}
+                          to={`/painel/ferramentas/editar/${ferramenta.id}`}
                           className="text-primary hover:text-primary/80 transition-colors"
                           title="Editar"
                         >
@@ -178,8 +184,13 @@ const ListarFerramentas = () => {
             </table>
           </div>
         )}
+        </div>
+        
+        {/* Footer Navigation */}
+        <FooterNav />
       </div>
     </div>
+    </>
   )
 }
 

@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuthStore } from '../stores'
 
-// Ícones SVG simples (você pode substituir por biblioteca de ícones)
+// Ícones SVG simples
 const HomeIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -28,76 +28,134 @@ const FerramentasIcon = () => (
   </svg>
 )
 
-const AdminIcon = () => (
+const AdminDashboardIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+  </svg>
+)
+
+const LogoutIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
   </svg>
 )
 
 const FooterNav = () => {
-  const { isAuthenticated, isUserAdmin } = useAuthStore()
+  const { isAuthenticated, hasToolAccess, user, teamData, logout } = useAuthStore()
 
-  const navigationItems = [
+  // Itens base da navegação (lado esquerdo)
+  const baseItems = [
     {
       name: 'Ninho',
       path: '/',
       icon: HomeIcon,
-      showAlways: true
     },
     {
       name: 'Curadoria',
       path: '/#curadoria',
       icon: CuratoriaIcon,
-      showAlways: true
     },
     {
       name: 'Categorias',
       path: '/#categorias',
       icon: CategoriasIcon,
-      showAlways: true
     },
     {
       name: 'Ferramentas',
       path: '/#ferramentas',
       icon: FerramentasIcon,
-      showAlways: true
     }
   ]
 
-  // Adicionar item admin se o usuário for admin
-  if (isAuthenticated() && isUserAdmin()) {
-    navigationItems.push({
-      name: 'Admin',
-      path: '/admin',
-      icon: AdminIcon,
-      showAlways: false
-    })
-  }
+  // Obter nome do usuário
+  const userName = teamData?.nome || user?.email?.split('@')[0] || 'Usuário'
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-primary/20 px-4 py-2 z-50">
-      <div className="flex justify-around items-center max-w-md mx-auto">
-        {navigationItems.map((item) => {
-          const IconComponent = item.icon
-          
-          return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-primary/20 px-4 py-2 z-50 shadow-lg">
+      <div className="flex justify-between items-center max-w-7xl mx-auto">
+        {/* Itens principais (lado esquerdo) */}
+        <div className="flex items-center space-x-4">
+          {baseItems.map((item) => {
+            const IconComponent = item.icon
+            
+            return (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex flex-col items-center justify-center px-2 py-1 ${
+                    isActive
+                      ? 'text-primary'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`
+                }
+              >
+                <IconComponent />
+                <span className="text-xs mt-1">{item.name}</span>
+              </NavLink>
+            )
+          })}
+        </div>
+
+        {/* Área de autenticação/usuário (lado direito) */}
+        <div className="flex items-center space-x-3">
+          {!isAuthenticated ? (
             <NavLink
-              key={item.name}
-              to={item.path}
+              to="/login"
               className={({ isActive }) =>
-                `flex flex-col items-center p-2 rounded-lg transition-all duration-200 ${
+                `flex flex-col items-center justify-center px-3 py-1 ${
                   isActive
-                    ? 'text-primary bg-primary/10'
-                    : 'text-gray-600 hover:text-primary hover:bg-primary/5'
+                    ? 'text-primary'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`
               }
             >
-              <IconComponent />
-              <span className="text-xs mt-1 font-medium">{item.name}</span>
+              <AdminDashboardIcon />
+              <span className="text-xs mt-1">Login</span>
             </NavLink>
-          )
-        })}
+          ) : (
+            <>
+              {/* Nome do usuário */}
+              <div className="flex flex-col items-center justify-center px-2 py-1">
+                <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-medium text-primary">
+                    {userName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <span className="text-xs mt-1 text-gray-600 max-w-16 truncate">
+                  {userName}
+                </span>
+              </div>
+
+              {/* Painel Admin (se tiver acesso) */}
+              {hasToolAccess() && (
+                <NavLink
+                  to="/painel"
+                  className={({ isActive }) =>
+                    `flex flex-col items-center justify-center px-3 py-1 ${
+                      isActive
+                        ? 'text-primary'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`
+                  }
+                >
+                  <AdminDashboardIcon />
+                  <span className="text-xs mt-1">Painel</span>
+                </NavLink>
+              )}
+
+              {/* Botão Sair */}
+              <button
+                onClick={logout}
+                className="flex flex-col items-center justify-center px-3 py-1 text-gray-500 hover:text-red-600 transition-colors"
+                title="Sair"
+              >
+                <LogoutIcon />
+                <span className="text-xs mt-1">Sair</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   )

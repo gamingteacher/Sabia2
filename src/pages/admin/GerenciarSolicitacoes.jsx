@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { FileText, Check, X } from 'lucide-react'
 import { supabase } from '../../services/supabase'
 import { useAuthStore } from '../../stores'
 import AdminHeader from '../../components/AdminHeader'
@@ -187,9 +188,7 @@ const GerenciarSolicitacoes = () => {
       {solicitacoes.length === 0 ? (
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+            <FileText className="w-8 h-8 text-gray-400" />
           </div>
           <p className="text-gray-600">Nenhuma solicitação pendente</p>
         </div>
@@ -222,9 +221,7 @@ const GerenciarSolicitacoes = () => {
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                        <Check className="w-4 h-4" />
                         Aprovar
                       </>
                     )}
@@ -235,9 +232,7 @@ const GerenciarSolicitacoes = () => {
                     disabled={processingId === solicitacao.id}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-4 h-4" />
                     Rejeitar
                   </button>
                 </div>

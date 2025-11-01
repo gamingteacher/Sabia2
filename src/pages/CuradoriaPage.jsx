@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, CheckCircle, Info, BookOpen } from 'lucide-react'
 
 const CuradoriaPage = () => {
   const navigate = useNavigate()
@@ -13,17 +14,13 @@ const CuradoriaPage = () => {
             onClick={() => navigate(-1)}
             className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeft className="w-5 h-5 mr-2" />
             Voltar
           </button>
           
           <div className="text-center">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <CheckCircle className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-2">Como funciona a curadoria no sabIA</h1>
             <p className="text-lg opacity-90">Nosso processo de seleção e análise</p>
@@ -69,9 +66,7 @@ const CuradoriaPage = () => {
           <div className="mb-10">
             <div className="flex items-center mb-4">
               <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
-                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Info className="w-6 h-6 text-primary" />
               </div>
               <h2 className="text-2xl font-bold text-gray-800">Para que serve</h2>
             </div>
@@ -108,9 +103,7 @@ const CuradoriaPage = () => {
           <div className="mb-10">
             <div className="flex items-center mb-4">
               <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center mr-3">
-                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+                <BookOpen className="w-6 h-6 text-primary" />
               </div>
               <h2 className="text-2xl font-bold text-gray-800">Como pode ajudar</h2>
             </div>

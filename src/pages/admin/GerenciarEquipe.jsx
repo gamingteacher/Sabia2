@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Shield, User, Users, Trash2 } from 'lucide-react'
 import { supabase } from '../../services/supabase'
 import { useAuthStore } from '../../stores'
 import FooterNav from '../../components/FooterNav'
@@ -26,7 +27,9 @@ const GerenciarEquipe = () => {
       setLoading(true)
       setError('')
       
-      // Consultar diretamente a tabela equipe
+      console.log('Carregando equipe...')
+      
+      // Consultar diretamente a tabela equipe com timestamp para evitar cache
       const { data, error } = await supabase
         .from('equipe')
         .select('*')
@@ -38,6 +41,9 @@ const GerenciarEquipe = () => {
         return
       }
 
+      console.log('Equipe carregada:', data?.length || 0, 'membros')
+      console.log('Dados da equipe:', data)
+      
       setEquipe(data || [])
     } catch (error) {
       console.error('Erro ao carregar equipe:', error)
@@ -64,12 +70,21 @@ const GerenciarEquipe = () => {
       setError('')
       setSuccess('')
       
-      // Remover usuário diretamente da tabela
-      const { data, error } = await supabase
+      // Buscar dados do usuário antes de remover
+      const { data: existingUser, error: checkError } = await supabase
         .from('equipe')
-        .delete()
+        .select('nome, email')
         .eq('id', userId)
-        .select()
+        .single()
+
+      if (checkError || !existingUser) {
+        setError('Usuário não encontrado na equipe')
+        return
+      }
+
+      // Usar função RPC para remover
+      const { data, error } = await supabase
+        .rpc('remove_team_member', { member_id: userId })
 
       if (error) {
         console.error('Erro ao remover usuário:', error)
@@ -77,14 +92,23 @@ const GerenciarEquipe = () => {
         return
       }
 
-      if (data && data.length > 0) {
-        setSuccess('Usuário removido da equipe com sucesso!')
-        await loadEquipe() // Recarregar lista
-      } else {
-        setError('Usuário não encontrado')
+      if (!data) {
+        setError('Usuário não foi encontrado ou não pôde ser removido')
+        return
       }
+
+      setSuccess(`Usuário "${existingUser.nome}" removido da equipe com sucesso!`)
+      
+      // Atualizar estado local imediatamente
+      setEquipe(prevEquipe => prevEquipe.filter(membro => membro.id !== userId))
+      
+      // Recarregar lista após um tempo
+      setTimeout(() => {
+        loadEquipe()
+      }, 500)
+      
     } catch (error) {
-      console.error('Erro ao remover:', error)
+      console.error('Erro ao remover usuário:', error)
       setError('Erro ao remover usuário: ' + error.message)
     } finally {
       setProcessingId(null)
@@ -102,15 +126,24 @@ const GerenciarEquipe = () => {
       setError('')
       setSuccess('')
       
-      // Atualizar papel na tabela equipe
-      const { data, error } = await supabase
+      // Buscar dados do usuário antes de alterar
+      const { data: existingUser, error: checkError } = await supabase
         .from('equipe')
-        .update({ 
-          papel: novoPapel,
-          updated_at: new Date().toISOString()
-        })
+        .select('nome')
         .eq('id', userId)
-        .select()
+        .single()
+
+      if (checkError || !existingUser) {
+        setError('Usuário não encontrado na equipe')
+        return
+      }
+
+      // Usar função RPC para alterar papel
+      const { data, error } = await supabase
+        .rpc('update_team_member_role', { 
+          member_id: userId, 
+          new_role: novoPapel 
+        })
 
       if (error) {
         console.error('Erro ao alterar papel:', error)
@@ -118,12 +151,13 @@ const GerenciarEquipe = () => {
         return
       }
 
-      if (data && data.length > 0) {
-        setSuccess(`Papel alterado para "${novoPapel}" com sucesso!`)
-        await loadEquipe() // Recarregar lista
-      } else {
-        setError('Usuário não encontrado')
+      if (!data) {
+        setError('Usuário não foi encontrado ou papel não pôde ser alterado')
+        return
       }
+
+      setSuccess(`Papel de "${existingUser.nome}" alterado para "${novoPapel}" com sucesso!`)
+      await loadEquipe() // Recarregar lista
     } catch (error) {
       console.error('Erro ao alterar papel:', error)
       setError('Erro ao alterar papel: ' + error.message)
@@ -146,18 +180,14 @@ const GerenciarEquipe = () => {
     if (isAdmin) {
       return (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M9.75 1l2.5 4.5H17v13H3V5.5h4.75L9.75 1zM10 3.414L8.293 5.5H5v11h10V5.5h-3.293L10 3.414z" clipRule="evenodd" />
-          </svg>
+          <Shield className="w-3 h-3 mr-1" />
           Administrador
         </span>
       )
     } else {
       return (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-          </svg>
+          <User className="w-3 h-3 mr-1" />
           Membro
         </span>
       )
@@ -205,9 +235,7 @@ const GerenciarEquipe = () => {
       {equipe.length === 0 ? (
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-            </svg>
+            <Users className="w-8 h-8 text-gray-400" />
           </div>
           <p className="text-gray-600">Nenhum membro na equipe</p>
         </div>
@@ -257,9 +285,7 @@ const GerenciarEquipe = () => {
                       disabled={processingId === membro.id}
                       className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      <Trash2 className="w-4 h-4" />
                       Remover
                     </button>
                   )}

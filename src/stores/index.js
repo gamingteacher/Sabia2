@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { authService } from '../services/supabase'
+import { authService, supabase } from '../services/supabase'
 
 // Store principal de autenticação
 export const useAuthStore = create(
@@ -220,7 +220,7 @@ export const useAuthStore = create(
   )
 )
 
-// Store para gerenciamento de ferramentas (temporário - substituindo o antigo sistema)
+// Store para gerenciamento de ferramentas
 export const useFerramentasStore = create((set, get) => ({
   ferramentas: [],
   ferramentaAtual: null,
@@ -230,9 +230,16 @@ export const useFerramentasStore = create((set, get) => ({
   loadFerramentas: async () => {
     set({ loading: true, error: null })
     try {
-      // Aqui você pode implementar a lógica real
-      const mockData = []
-      set({ ferramentas: mockData, loading: false })
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      set({ ferramentas: data || [], loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
     }
@@ -241,36 +248,100 @@ export const useFerramentasStore = create((set, get) => ({
   loadFerramenta: async (id) => {
     set({ loading: true, error: null })
     try {
-      // Aqui você pode implementar a lógica real
-      const mockData = null
-      set({ ferramentaAtual: mockData, loading: false })
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      set({ ferramentaAtual: data, loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
     }
   },
 
-  createFerramenta: async (data) => {
-    set({ loading: true, error: null })
+  createFerramenta: async (ferramentaData) => {
     try {
-      // Aqui você pode implementar a lógica real
-      console.log('Criando ferramenta:', data)
-      set({ loading: false })
-      return { success: true }
+      console.log('Enviando para Supabase:', ferramentaData)
+      
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .insert([ferramentaData])
+        .select()
+
+      if (error) {
+        console.error('Erro do Supabase:', error)
+        throw new Error(error.message)
+      }
+
+      console.log('Ferramenta criada:', data)
+
+      // Recarregar lista após criar
+      const { loadFerramentas } = get()
+      await loadFerramentas()
+
+      return { success: true, data: data[0] }
     } catch (error) {
-      set({ error: error.message, loading: false })
+      console.error('Erro ao criar ferramenta:', error)
+      return { success: false, error: error.message }
+    }
+  },
+
+  updateFerramenta: async (id, ferramentaData) => {
+    try {
+      console.log('Atualizando ferramenta:', id, ferramentaData)
+      
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .update(ferramentaData)
+        .eq('id', id)
+        .select()
+
+      if (error) {
+        console.error('Erro do Supabase:', error)
+        throw new Error(error.message)
+      }
+
+      console.log('Ferramenta atualizada:', data)
+
+      // Recarregar lista após atualizar
+      const { loadFerramentas } = get()
+      await loadFerramentas()
+
+      return { success: true, data: data[0] }
+    } catch (error) {
+      console.error('Erro ao atualizar ferramenta:', error)
       return { success: false, error: error.message }
     }
   },
 
   deleteFerramenta: async (id) => {
-    set({ loading: true, error: null })
     try {
-      // Aqui você pode implementar a lógica real
       console.log('Deletando ferramenta:', id)
-      set({ loading: false })
+      
+      const { error } = await supabase
+        .from('ferramentas')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        console.error('Erro do Supabase:', error)
+        throw new Error(error.message)
+      }
+
+      console.log('Ferramenta deletada')
+
+      // Recarregar lista após deletar
+      const { loadFerramentas } = get()
+      await loadFerramentas()
+
       return { success: true }
     } catch (error) {
-      set({ error: error.message, loading: false })
+      console.error('Erro ao deletar ferramenta:', error)
       return { success: false, error: error.message }
     }
   }

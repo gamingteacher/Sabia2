@@ -11,7 +11,7 @@ const AdminHeader = ({ title, subtitle, solicitacoesPendentes = 0 }) => {
         <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold">Painel Administrativo</h1>
+              <h1 className="text-2xl font-bold">Painel SabIA</h1>
               <p className="text-sm text-primary-100">
                 {subtitle || "Gerencie ferramentas, páginas e solicitações"}
               </p>
@@ -24,14 +24,6 @@ const AdminHeader = ({ title, subtitle, solicitacoesPendentes = 0 }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6 bg-white rounded-lg shadow-sm overflow-hidden">
           <nav className="flex overflow-x-auto">
-            <Link 
-              to="/painel" 
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap ${
-                location.pathname === '/painel' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-primary'
-              }`}
-            >
-              Dashboard
-            </Link>
             <Link 
               to="/painel/ferramentas" 
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap ${

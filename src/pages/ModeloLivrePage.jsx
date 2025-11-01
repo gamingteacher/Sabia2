@@ -20,13 +20,13 @@ export default function ModeloLivrePage() {
         {/* Título centralizado */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-6">
-            Modelo <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-600 to-blue-600 text-6xl md:text-7xl font-black">L.I.V.R.E.</span>
+            Modelo <span className="text-yellow-500 bg-clip-text text-6xl md:text-7xl font-black">L.I.V.R.E.</span>
           </h1>
         </div>
 
         {/* Introdução */}
-        <div className="bg-primary rounded-xl shadow-lg p-8 mb-12">
-          <p className="text-lg text-text-dark leading-relaxed text-center max-w-3xl mx-auto">
+        <div className="p-8 mb-12">
+          <p className="text-lg leading-relaxed text-left max-w-3xl mx-auto">
             O modelo L.I.V.R.E. foi criado para orientar estudantes, professores e curiosos a analisarem criticamente o uso de ferramentas de inteligência artificial na aprendizagem de línguas. Cada letra representa uma dimensão importante a considerar antes de adotar uma tecnologia.
           </p>
         </div>
@@ -100,31 +100,31 @@ export default function ModeloLivrePage() {
         </div>
 
         {/* Como usar o modelo */}
-        <div className="bg-primary rounded-xl p-8">
-          <h2 className="text-3xl font-bold text-text-dark mb-6 text-center">Como usar o modelo?</h2>
+        <div className="p-8">
+          <h2 className="text-3xl font-bold mb-6 text-center">Como usar o modelo?</h2>
           
-          <p className="text-lg text-text-dark mb-6 text-center">
+          <p className="text-lg mb-6 text-center">
             Você pode utilizar o L.I.V.R.E. para:
           </p>
 
           <div className="space-y-4 max-w-3xl mx-auto">
             <div className="flex items-start gap-4">
-              <div className="w-2 h-2 bg-white rounded-full mt-3 flex-shrink-0"></div>
-              <p className="text-lg text-text-dark">
+              <div className="w-2 h-2 bg-black rounded-full mt-3 flex-shrink-0"></div>
+              <p className="text-lg">
                 Guiar reflexões individuais ou em grupo sobre ferramentas digitais
               </p>
             </div>
             
             <div className="flex items-start gap-4">
-              <div className="w-2 h-2 bg-white rounded-full mt-3 flex-shrink-0"></div>
-              <p className="text-lg text-text-dark">
+              <div className="w-2 h-2 bg-black rounded-full mt-3 flex-shrink-0"></div>
+              <p className="text-lg">
                 Avaliar criticamente o uso de IA na sua rotina de estudo
               </p>
             </div>
             
             <div className="flex items-start gap-4">
-              <div className="w-2 h-2 bg-white rounded-full mt-3 flex-shrink-0"></div>
-              <p className="text-lg text-text-dark">
+              <div className="w-2 h-2 bg-black rounded-full mt-3 flex-shrink-0"></div>
+              <p className="text-lg">
                 Incluir em projetos, oficinas ou momentos formativos
               </p>
             </div>

@@ -53,6 +53,7 @@ function App() {
         {/* Rotas públicas */}
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
+          <Route path="ferramentas" element={<ToolPage />} />
           <Route path="ferramenta/:id" element={<ToolPage />} />
           
           {/* Páginas estáticas */}

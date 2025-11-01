@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, Info } from 'lucide-react'
 
 const SobrePage = () => {
   const navigate = useNavigate()
@@ -13,9 +14,7 @@ const SobrePage = () => {
             onClick={() => navigate(-1)}
             className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeft className="w-5 h-5 mr-2" />
             Voltar
           </button>
           
@@ -53,9 +52,7 @@ const SobrePage = () => {
           <div className="mt-8 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-6 border-l-4 border-primary">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <svg className="w-6 h-6 text-primary mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Info className="w-6 h-6 text-primary mt-1" />
               </div>
               <div className="ml-3">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Nossa Missão</h3>

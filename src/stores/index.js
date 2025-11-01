@@ -347,20 +347,163 @@ export const useFerramentasStore = create((set, get) => ({
   }
 }))
 
-// Store para gerenciamento de páginas (temporário)
+// Store para gerenciamento de páginas/posts
 export const usePaginasStore = create((set, get) => ({
   paginas: [],
+  paginaAtual: null,
   loading: false,
   error: null,
 
+  // Carregar todas as páginas
   loadPaginas: async () => {
     set({ loading: true, error: null })
     try {
-      // Aqui você pode implementar a lógica real
-      const mockData = []
-      set({ paginas: mockData, loading: false })
+      const { data, error } = await supabase
+        .from('paginas_relacionadas')
+        .select(`
+          *,
+          ferramentas(id, nome)
+        `)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      set({ paginas: data || [], loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
+    }
+  },
+
+  // Carregar página por slug
+  loadPaginaBySlug: async (slug) => {
+    set({ loading: true, error: null })
+    try {
+      const { data, error } = await supabase
+        .from('paginas_relacionadas')
+        .select(`
+          *,
+          ferramentas(id, nome)
+        `)
+        .eq('slug', slug)
+        .single()
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      set({ paginaAtual: data, loading: false })
+    } catch (error) {
+      set({ error: error.message, loading: false })
+    }
+  },
+
+  // Carregar página por ID
+  loadPagina: async (id) => {
+    set({ loading: true, error: null })
+    try {
+      const { data, error } = await supabase
+        .from('paginas_relacionadas')
+        .select(`
+          *,
+          ferramentas(id, nome)
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      set({ paginaAtual: data, loading: false })
+    } catch (error) {
+      set({ error: error.message, loading: false })
+    }
+  },
+
+  // Criar nova página
+  createPagina: async (paginaData) => {
+    try {
+      console.log('Criando página:', paginaData)
+      
+      const { data, error } = await supabase
+        .from('paginas_relacionadas')
+        .insert([paginaData])
+        .select()
+
+      if (error) {
+        console.error('Erro do Supabase:', error)
+        throw new Error(error.message)
+      }
+
+      console.log('Página criada:', data)
+
+      // Recarregar lista após criar
+      const { loadPaginas } = get()
+      await loadPaginas()
+
+      return { success: true, data: data[0] }
+    } catch (error) {
+      console.error('Erro ao criar página:', error)
+      return { success: false, error: error.message }
+    }
+  },
+
+  // Atualizar página
+  updatePagina: async (id, paginaData) => {
+    try {
+      console.log('Atualizando página:', id, paginaData)
+      
+      const { data, error } = await supabase
+        .from('paginas_relacionadas')
+        .update(paginaData)
+        .eq('id', id)
+        .select()
+
+      if (error) {
+        console.error('Erro do Supabase:', error)
+        throw new Error(error.message)
+      }
+
+      console.log('Página atualizada:', data)
+
+      // Recarregar lista após atualizar
+      const { loadPaginas } = get()
+      await loadPaginas()
+
+      return { success: true, data: data[0] }
+    } catch (error) {
+      console.error('Erro ao atualizar página:', error)
+      return { success: false, error: error.message }
+    }
+  },
+
+  // Deletar página
+  deletePagina: async (id) => {
+    try {
+      console.log('Deletando página:', id)
+      
+      const { error } = await supabase
+        .from('paginas_relacionadas')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        console.error('Erro do Supabase:', error)
+        throw new Error(error.message)
+      }
+
+      console.log('Página deletada')
+
+      // Recarregar lista após deletar
+      const { loadPaginas } = get()
+      await loadPaginas()
+
+      return { success: true }
+    } catch (error) {
+      console.error('Erro ao deletar página:', error)
+      return { success: false, error: error.message }
     }
   }
 }))

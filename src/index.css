@@ -4,9 +4,26 @@
 
 /* Estilos customizados */
 @layer utilities {
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
   .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -41,9 +58,280 @@ body {
   outline-offset: 2px;
 }
 
-/* Animações suaves */
-* {
+/* Animações suaves - aplicadas apenas onde necessário */
+button, a, input, select, textarea {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
+
+/* Estilos para visualização do markdown renderizado */
+.markdown-content {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.7;
+}
+
+/* Imagens - bordas curvadas e centralizadas */
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 1.5rem auto;
+  display: block;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Tabelas - header com cor principal e centralizada */
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-content th {
+  background-color: #d2691e;
+  color: white;
+  padding: 12px 16px;
+  text-align: center;
+  font-weight: 600;
+  border: none;
+}
+
+.markdown-content td {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.markdown-content tr:last-child td {
+  border-bottom: none;
+}
+
+.markdown-content tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Códigos - centralizados e destacados */
+.markdown-content code {
+  background-color: #f3f4f6;
+  color: #d2691e;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-weight: 500;
+}
+
+.markdown-content pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 1.5rem auto;
+  max-width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.markdown-content pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  font-weight: normal;
+}
+
+/* Quotes - centralizadas e destacadas */
+.markdown-content blockquote {
+  border-left: 4px solid #d2691e;
+  background-color: rgba(210, 105, 30, 0.05);
+  padding: 1.5rem;
+  margin: 1.5rem auto;
+  font-style: italic;
+  color: #4b5563;
+  border-radius: 8px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(210, 105, 30, 0.1);
+}
+
+/* Links com cor principal */
+.markdown-content a {
+  color: #d2691e;
+  text-decoration: underline;
+  text-decoration-color: rgba(210, 105, 30, 0.3);
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.markdown-content a:hover {
+  color: #b8591a;
+  text-decoration-color: #b8591a;
+}
+
+/* Títulos */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.markdown-content h1 {
+  font-size: 2.25rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.875rem;
+}
+
+.markdown-content h3 {
+  font-size: 1.5rem;
+}
+
+/* Parágrafos e listas */
+.markdown-content p {
+  margin-bottom: 1.25rem;
+  color: #374151;
+}
+
+/* Listas numeradas */
+.markdown-content ol {
+  margin-bottom: 1.25rem;
+  padding-left: 2rem;
+  list-style: none;
+  counter-reset: list-counter;
+}
+
+.markdown-content ol li {
+  counter-increment: list-counter;
+  position: relative;
+  margin-bottom: 0.75rem;
+  padding-left: 1rem;
+  color: #374151;
+}
+
+.markdown-content ol li::before {
+  content: counter(list-counter) ".";
+  position: absolute;
+  left: -1.5rem;
+  font-weight: 600;
+  color: #d2691e;
+  background-color: rgba(210, 105, 30, 0.1);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+}
+
+/* Listas com bullets */
+.markdown-content ul {
+  margin-bottom: 1.25rem;
+  padding-left: 2rem;
+  list-style: none;
+}
+
+.markdown-content ul li {
+  position: relative;
+  margin-bottom: 0.75rem;
+  padding-left: 1rem;
+  color: #374151;
+}
+
+.markdown-content ul li::before {
+  content: "•";
+  position: absolute;
+  left: -1rem;
+  font-weight: bold;
+  color: #d2691e;
+  font-size: 1.2rem;
+}
+
+/* Listas aninhadas */
+.markdown-content ul ul li::before {
+  content: "◦";
+  font-size: 1rem;
+}
+
+.markdown-content ul ul ul li::before {
+  content: "▪";
+  font-size: 0.875rem;
+}
+
+/* Checkboxes para task lists */
+.markdown-content input[type="checkbox"] {
+  margin-right: 0.5rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: #d2691e;
+  cursor: pointer;
+}
+
+.markdown-content li:has(input[type="checkbox"]) {
+  list-style: none;
+  padding-left: 0;
+}
+
+.markdown-content li:has(input[type="checkbox"])::before {
+  display: none;
+}
+
+.markdown-content li input[type="checkbox"]:checked + * {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* Formatação de texto */
+.markdown-content strong {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.markdown-content em {
+  font-style: italic;
+  color: #4b5563;
+}
+
+.markdown-content u {
+  text-decoration: underline;
+  text-decoration-color: #d2691e;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+/* Combinações de formatação */
+.markdown-content strong em,
+.markdown-content em strong {
+  font-weight: 700;
+  font-style: italic;
+  color: #1f2937;
+}
+
+.markdown-content strong u,
+.markdown-content u strong {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: #d2691e;
+  color: #1f2937;
+}
+
+.markdown-content em u,
+.markdown-content u em {
+  font-style: italic;
+  text-decoration: underline;
+  text-decoration-color: #d2691e;
+  color: #4b5563;
+}
+

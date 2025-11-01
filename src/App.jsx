@@ -10,6 +10,8 @@ import Layout from './components/Layout'
 // Páginas principais
 import HomePage from './pages/HomePage'
 import ToolPage from './pages/ToolPage'
+import PostsPage from './pages/PostsPage'
+import PostPage from './pages/PostPage'
 import LoginPage from './pages/LoginPage'
 import AdminDashboard from './pages/AdminDashboard'
 
@@ -54,6 +56,8 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="ferramentas" element={<ToolPage />} />
+          <Route path="posts" element={<PostsPage />} />
+          <Route path="post/:slug" element={<PostPage />} />
           <Route path="ferramenta/:id" element={<ToolPage />} />
           
           {/* Páginas estáticas */}

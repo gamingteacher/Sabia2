@@ -73,7 +73,7 @@ const ToolPage = () => {
       <header className="flex text-primary max-w-4xl mx-auto px-8 justify-between">
           {/* Ícone do pássaro (simplificado) */}
             <div className="flex items-center">
-              <img className="w-40 h-40" src="/src/assets/logobig.png" alt="Logo Sabia" />
+              <img className="w-40 h-40" src="/logobig.png" alt="Logo Sabia" />
               <div className="text-left">
                 <h1 className="text-3xl font-bold mb-2">Ferramentas de IA</h1>
                 <p className="text-primary-100">

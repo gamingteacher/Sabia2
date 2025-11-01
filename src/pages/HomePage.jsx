@@ -40,7 +40,7 @@ const HomePage = () => {
             <div className="flex items-center gap-6">
           {/* Ícone do pássaro (simplificado) */}
             <div className="flex-shrink-0">
-              <img className="h-40" src="/src/assets/logobig.png" alt="Logo Sabia" />
+              <img className="h-40" src="/logobig.png" alt="Logo Sabia" />
             </div>
           <div className="text-left">
             <h1 className="text-primary text-4xl md:text-5xl font-bold mb-4">sabIA</h1>
